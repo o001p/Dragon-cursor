@@ -20,9 +20,11 @@ A simple and interactive cursor animation project built using HTML and JavaScrip
 
 📁 Project Structure
 
-index.html        # Main HTML file
-main.js           # JavaScript logic
-package.json      # Project configuration
+- "index.html"→ Main HTML file
+
+- "main.js" → JavaScript logic
+
+- "package.json" → Project configuration
 
 ---
 

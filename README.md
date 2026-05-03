@@ -4,19 +4,25 @@ A simple and interactive cursor animation project built using HTML and JavaScrip
 
 ---
 
-🚀 Features
+🚀 Live Demo
 
-- Custom animated cursor
-- Smooth movement and effects
-- Lightweight and fast
+👉 https://o001p.github.io/dragon-cursor/
+
+---
+
+✨ Features
+
+- 🐉 Custom animated cursor
+- 🎯 Smooth movement and effects
+- ⚡ Lightweight and fast
 
 ---
 
 📁 Project Structure
 
-- "index.html" → Main HTML file
-- "main.js" → JavaScript logic
-- "package.json" → Project configuration
+index.html        # Main HTML file
+main.js           # JavaScript logic
+package.json      # Project configuration
 
 ---
 
@@ -31,11 +37,6 @@ A simple and interactive cursor animation project built using HTML and JavaScrip
 
 npm install
 
-
-After installation complete:
-
-npm start 
-
 ---
 
 🛠️ Technologies Used
@@ -48,7 +49,7 @@ npm start
 📌 Notes
 
 - "node_modules" is not included (to keep repo lightweight)
-- Dependencies can be installed using "npm install"
+- Install dependencies using "npm install"
 
 ---
 
@@ -58,6 +59,11 @@ Anand
 
 ---
 
-⭐ If you like this project
+⭐ Support
 
-Give it a star on GitHub!
+If you like this project:
+
+- ⭐ Star this repository
+- 🍴 Fork it
+
+---

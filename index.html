@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: transparent;
+      cursor: none;
+    }
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+  </style>
+</head>
+
+<body>
+<canvas id="c"></canvas>
+
+<script>
+const canvas = document.getElementById("c");
+const ctx = canvas.getContext("2d");
+
+canvas.width = innerWidth;
+canvas.height = innerHeight;
+
+let mouse = { x: canvas.width/2, y: canvas.height/2 };
+let lastMouse = { x: mouse.x, y: mouse.y };
+let pos = { x: mouse.x, y: mouse.y };
+
+let spine = [];
+const LENGTH = 20;
+
+let fire = [];
+let isFireMode = false;
+let fireTimer = 0;
+
+// spine
+for (let i = 0; i < LENGTH; i++) {
+  spine.push({ x: pos.x, y: pos.y });
+}
+
+document.addEventListener("mousemove", e => {
+  mouse.x = e.clientX;
+  mouse.y = e.clientY;
+});
+
+document.addEventListener("click", () => {
+  isFireMode = true;
+  fireTimer = 25;
+
+  for (let i = 0; i < 20; i++) {
+    fire.push({
+      x: spine[0].x,
+      y: spine[0].y,
+      vx: Math.cos(angle) * (Math.random()*5+2),
+      vy: Math.sin(angle) * (Math.random()*5+2),
+      life: 1
+    });
+  }
+});
+
+let angle = 0;
+let wing = 0;
+let wave = 0;
+
+function draw() {
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  let moving = Math.hypot(mouse.x - lastMouse.x, mouse.y - lastMouse.y) > 1;
+
+  pos.x += (mouse.x - pos.x) * 0.2;
+  pos.y += (mouse.y - pos.y) * 0.2;
+
+  let dx = mouse.x - pos.x;
+  let dy = mouse.y - pos.y;
+  angle = Math.atan2(dy, dx);
+
+  spine[0].x = pos.x;
+  spine[0].y = pos.y;
+
+  for (let i = 1; i < spine.length; i++) {
+    spine[i].x += (spine[i-1].x - spine[i].x) * 0.35;
+    spine[i].y += (spine[i-1].y - spine[i].y) * 0.35;
+  }
+
+  if (moving) {
+    wing += 0.25;
+    wave += 0.3;
+  }
+
+  // 🔥 COLOR FIX
+  let color = isFireMode ? "#ff0000" : "#000000";
+
+  ctx.lineJoin = "round";
+  ctx.lineCap = "round";
+
+  // ===== BODY =====
+  ctx.beginPath();
+
+  for (let i = 0; i < spine.length; i++) {
+    let p = spine[i];
+    let offset = moving ? Math.sin(wave + i*0.4) * 2 : 0;
+    let t = i / spine.length;
+    let thickness = (1 - t) * 8 + 1;
+
+    if (i === 0) {
+      ctx.moveTo(p.x, p.y);
+    } else {
+      let prev = spine[i-1];
+      let ang = Math.atan2(p.y - prev.y, p.x - prev.x);
+
+      let nx = Math.cos(ang + Math.PI/2) * thickness;
+      let ny = Math.sin(ang + Math.PI/2) * thickness;
+
+      ctx.lineTo(p.x + nx, p.y + ny + offset);
+    }
+  }
+
+  for (let i = spine.length-1; i >= 0; i--) {
+    let p = spine[i];
+    let t = i / spine.length;
+    let thickness = (1 - t) * 8 + 1;
+
+    let prev = spine[i === 0 ? 0 : i-1];
+    let ang = Math.atan2(p.y - prev.y, p.x - prev.x);
+
+    let nx = Math.cos(ang - Math.PI/2) * thickness;
+    let ny = Math.sin(ang - Math.PI/2) * thickness;
+
+    ctx.lineTo(p.x + nx, p.y + ny);
+  }
+
+  ctx.closePath();
+  ctx.fillStyle = color;
+  ctx.fill();
+
+  // ===== HEAD =====
+  let head = spine[0];
+  ctx.beginPath();
+  ctx.arc(head.x, head.y, 4, 0, Math.PI*2);
+  ctx.fillStyle = color;
+  ctx.fill();
+
+  // eyes
+  ctx.fillStyle = isFireMode ? "yellow" : "white";
+  ctx.beginPath();
+  ctx.arc(head.x-1.5, head.y-1, 1, 0, Math.PI*2);
+  ctx.arc(head.x+1.5, head.y-1, 1, 0, Math.PI*2);
+  ctx.fill();
+
+  // ===== WINGS =====
+  ctx.save();
+  ctx.translate(head.x, head.y);
+  ctx.rotate(angle);
+
+  let wingSize = 18 + (moving ? Math.sin(wing)*8 : 0);
+
+  ctx.fillStyle = color;
+
+  ctx.beginPath();
+  ctx.moveTo(0,0);
+  ctx.lineTo(-wingSize, -wingSize);
+  ctx.lineTo(-5,0);
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.moveTo(0,0);
+  ctx.lineTo(-wingSize, wingSize);
+  ctx.lineTo(-5,0);
+  ctx.fill();
+
+  ctx.restore();
+
+  // ===== FIRE =====
+  for (let i = fire.length-1; i >= 0; i--) {
+    let f = fire[i];
+
+    f.x += f.vx;
+    f.y += f.vy;
+    f.life -= 0.04;
+
+    let g = ctx.createRadialGradient(f.x,f.y,0,f.x,f.y,12);
+    g.addColorStop(0, `rgba(255,0,0,${f.life})`);
+    g.addColorStop(0.5, `rgba(255,150,0,${f.life})`);
+    g.addColorStop(1, `rgba(0,0,0,0)`);
+
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(f.x,f.y,6,0,Math.PI*2);
+    ctx.fill();
+
+    if (f.life <= 0) fire.splice(i,1);
+  }
+
+  if (isFireMode) {
+    fireTimer--;
+    if (fireTimer <= 0) isFireMode = false;
+  }
+
+  lastMouse.x = mouse.x;
+  lastMouse.y = mouse.y;
+
+  requestAnimationFrame(draw);
+}
+
+draw();
+
+window.addEventListener("resize", () => {
+  canvas.width = innerWidth;
+  canvas.height = innerHeight;
+});
+</script>
+
+</body>
+</html>npm

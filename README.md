@@ -30,6 +30,7 @@ A simple and interactive cursor animation project built using HTML and JavaScrip
 📦 Install Dependencies (if needed)
 
 npm install
+
 After installation complete:
 npm start 
 
